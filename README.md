@@ -76,6 +76,4 @@ If you use this code, please cite:
     Levakov, G., Ganor, S. & Avidan, G. (2023), “Reliability and validity of brain-gastric phase synchronization”, Human brain mapping, (under review).
 
 ### Issues
-Cepy is an open-source software project, and we welcome contributions from anyone. 
-We suggest [raising](https://github.com/GidLev/cepy/issues) an issue prior to 
-working on a new feature. 
+Please [raise an issue](https://github.com/GidLev/cepy/issues) if you have any questions/ comments regarding the code.
