@@ -11,7 +11,7 @@ First make sure you have the following prerequisites:
 - Python packages: numpy, scipy, nibabel, pandas, matplotlib, scikit-learn, nilearn, fslpy, mne-python, bioread, nipype
 
 Prepare the folder structure specified here under [Expected folder structure](#expected-folder-structure).
-Copy the data from [link](data) to the corresponding folders in the project folder.
+Copy the data from [link](https://doi.org/10.6084/m9.figshare.21952910.v1) to the corresponding folders in the project folder.
 Copy the code from this repository to corresponding folders in the project folder.
 Finally, run the main script `main_voxel_based.py` from the project folder.
 
