@@ -128,7 +128,6 @@ def oxi_peaks(
 
     return peaks
 
-
 def rr_artefacts(
     rr: Union[List, np.ndarray], c1: float = 0.13, c2: float = 0.17, alpha: float = 5.2
 ) -> Dict[str, np.ndarray]:

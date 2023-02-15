@@ -15,10 +15,10 @@ import argparse
 import os
 from config import main_project_path, intermediate_sample_rate, \
     window, overlap, freq_range, bandpass_lim, transition_width, \
-    filter_order, zscore_flag, preproc_v
+    filter_order, zscore_flag, clean_level, trigger_channel
 import warnings
 
-# Handle command line arguments
+# # Handle command line arguments
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('subject', metavar='subject_name', help='The subject to process')
 parser.add_argument('run', metavar='run_number', help='The run number of the subject')
@@ -46,20 +46,19 @@ original_sample_rate = data.channels[0].samples_per_second # sample rate of the 
 signal_time = data.channels[0].time_index # the time label (in seconds) for each time point in the signal
 duration = original_sample_rate * record_meta['mri_length'] # the expected duration of the data in seconds
 num_gast = record_meta['num_channles'] # number of gastric channels
-signal_egg = [data.channels[i].data for i in range(num_gast)]
 
 ## Get the MRI trigger indecies or calculate them
-trigger = data.channels[8].data  # data from trigger signal
+trigger = data.channels[trigger_channel].data  # data from trigger signal (change `trigger_channel` to the appropriate channel number)
 trigger = trigger.astype(int)
 if record_meta['trigger_start'] == 'auto':
     if trigger[0] == 0:
         action_idx = [np.where(trigger)[0][0], np.where(trigger)[0][0] + int(duration)]
     else:
         no_trigger_locs = np.where(trigger == 0)[0]
-        trigger_locs = np.where(trigger == 5)[0]
+        trigger_locs = np.where(trigger >= 0.999)[0]
         str_loc = trigger_locs[trigger_locs > no_trigger_locs[0]][0]
         action_idx = [str_loc, str_loc + int(duration)]
-        warnings.warn('The signal started with a trigger, skipped to the next one')
+        warnings.warn('The signal started with the trigger channel larger then zero, skipped to the next one')
 else:
     print('No auto Trigger Signal exist')
     trigger_start = int(max(float(record_meta['trigger_start']),0) * original_sample_rate)
@@ -87,7 +86,7 @@ plot_signal(signal_time, signal_egg, 'EGG signal after resampling',
 max_freq, dominant_channel_num, power_spect_data_list = powerspect(signal_egg, window, overlap, intermediate_sample_rate,
                                                        freq_range, True, subject_name, run, plot_path,
                                                        dominant = record_meta['dominant_channel'],
-                                                                   dominant_freq = record_meta['dominant_frequency'])
+                                                       dominant_freq = record_meta['dominant_frequency'])
 
 if (record_meta['dominant_channel'] != 'auto') | \
         (record_meta['dominant_frequency'] != 'auto'):
@@ -113,6 +112,6 @@ if zscore_flag:
 plot_signal(signal_time, [signal_egg_selected], 'EGG filtered',
             'egg_filtered', subject_name + '_' + run, plot_path)
 
-np.save(data_path + '/gast_data_' + subject_name + '_run' + run + preproc_v + '.npy',signal_egg_selected)
-np.save(data_path + '/max_freq' + subject_name + '_run' + run + preproc_v + '.npy',max_freq)
+np.save(data_path + '/gast_data_' + subject_name + '_run' + run + clean_level + '.npy', signal_egg_selected)
+np.save(data_path + '/max_freq' + subject_name + '_run' + run + clean_level + '.npy', max_freq)
 print('Done gastric preprocessing for: ', subject_name, run)

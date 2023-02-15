@@ -70,7 +70,7 @@ def call(bids_dir, output_dir, tmp_dir, fs_dir, fs_license, fmriprep_v,
                     text_file.write('docker finished in :  ' + str(datetime.now()))
                     text_file.write('Took  ' + str(elapsed_time) + ' second.')
     except:
-        warnings.warn('Docker failed time: '  + str(datetime.now()))
+        warnings.warn('Docker failed time: '  + str(datetime.now()) + ' (delete the resulting log file to try again)')
 
 bids_dir = main_project_path + '/BIDS_data/soroka'
 output_dir = main_project_path + '/fmriprep/out'

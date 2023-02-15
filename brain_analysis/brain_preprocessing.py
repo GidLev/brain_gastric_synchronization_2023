@@ -6,8 +6,8 @@ import sys
 import pathlib
 sys.path.insert(0, os.path.dirname(pathlib.Path(__file__).parent.resolve()))
 os.chdir(os.path.dirname(pathlib.Path(__file__).parent.resolve()))
-from config import (sample_rate_fmri, bandpass_lim, filter_order, transition_width, 
-                    brain_fwhm, main_project_path, zscore_flag, preproc_v)
+from config import (sample_rate_fmri, bandpass_lim, filter_order, transition_width,
+                    brain_fwhm, main_project_path, zscore_flag, clean_level, clean_level)
 import numpy as np
 from mne.filter import filter_data
 from sklearn.preprocessing import scale
@@ -32,15 +32,17 @@ if not os.path.isdir(data_path):
     os.makedirs(data_path)
 
 # loading the data
-gastric_peak = np.load(data_path + '/max_freq' + subject_name + '_run' + run + preproc_v + '.npy').flatten()
+gastric_peak = np.load(data_path + '/max_freq' + subject_name + '_run' + run + clean_level + '.npy').flatten()
 record_meta_pd = pd.read_csv('dataframes/egg_brain_meta_data.csv')
 record_meta = record_meta_pd.loc[(record_meta_pd['subject'] == subject_name) &
                                  (record_meta_pd['run'] == int(run)), :].to_dict('records')[0]
-img = nib.load(f'{main_project_path}/fmriprep/out/{subject_name}/fmriprep/{subject_name}_task-rest_run-0{run}'
-               f'_space-MNI152NLin6Asym_desc-preproc_bold_{preproc_v}.nii.gz')
+img_path = main_project_path + '/fmriprep/clean/{subject}/fmriprep/' \
+                                 '{subject}_task-rest_run-0{run}_space-MNI152NLi' \
+                                 'n6Asym_desc-preproc_bold_clean_' + clean_level + '.nii.gz'
+img = nib.load(img_path.format(subject=subject_name, run=run))
 vol = img.get_fdata()
 
-if np.abs(1/img.header.get_zooms()[3] - sample_rate_fmri) > 0.0001:
+if np.isclose(1/img.header.get_zooms()[3], sample_rate_fmri, rtol=0.0001, atol=0.0001):
     raise Exception ('TR length in the nifti header', img.header.get_zooms()[3], ' does not match the expected length', 1 /sample_rate_fmri)
 
 # smoothing the mean image of the brain along the 300 time series.
@@ -81,7 +83,7 @@ plt.xlabel('Time (sec)'); plt.ylabel('Signal')
 plt.savefig(plot_path + '/filter_data_brain.png')
 plt.close('all')
 
-np.savez_compressed(data_path + '/func_filtered_' + subject_name + '_run' + run + preproc_v + '.npz',
+np.savez_compressed(data_path + '/func_filtered_' + subject_name + '_run' + run + clean_level + '.npz',
                     brain_signal = braindata)
-np.savez_compressed(data_path + '/mask_' + subject_name + '_run' + run  + preproc_v + '.npz', mask = mask)
+np.savez_compressed(data_path + '/mask_' + subject_name + '_run' + run + clean_level + '.npz', mask = mask)
 print('Done brain preprocessing for: ', subject_name, run)

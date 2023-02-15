@@ -2,9 +2,10 @@ import os
 
 #variables for anaylsis:
 main_project_path = '/path/to/my/project/dir'
-preproc_v = 'strict' # 'strict' #'strict_gs' # 'strict_gs_cardiac' # 'minimal'
+clean_level = 'strict' # 'strict' #'strict_gs' # 'strict_gs_cardiac' # 'minimal'
 sample_rate_fmri = 0.5
 intermediate_sample_rate = 10
+trigger_channel = 8 # the channel number that recorded the trigger from the fMRI
 filter_order = 5 # parameter related to the band pass filter
 bandpass_lim = 0.015 # parameter related to the band pass filter (Hz)
 transition_width = 15 / 100 # parameter related to the band pass filter, percent of half the filter size
@@ -22,3 +23,4 @@ intermediate_ppu_sample_rate = 1
 zscore_flag = True
 subjects_null = False
 single_run_flag = False
+

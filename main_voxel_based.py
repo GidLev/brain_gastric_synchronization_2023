@@ -8,7 +8,7 @@ import subprocess
 import sys
 import pandas as pd
 from multiprocessing.dummy import Pool as ThreadPool
-from config import num_threads, multi_thread, preproc_v
+from config import num_threads, multi_thread, clean_level
 
 def call(params):
     """Call a script and exit if the script failed."""
@@ -20,12 +20,13 @@ def call(params):
 
 # read and filter the subjects list
 record_meta_pd = pd.read_csv('dataframes/egg_brain_meta_data.csv')
-if preproc_v == 'strict_gs_cardiac':
+if clean_level == 'strict_gs_cardiac':
     record_meta_pd = record_meta_pd.loc[record_meta_pd['ppu_exclude'] == False, :]
     record_meta_pd = record_meta_pd.loc[record_meta_pd['ppu_found'] == True, :]
-    subprocess.call(['python', 'ppu_analysis/add_cardiac_confound.py'])
 
 subprocess.call(['python', 'brain_analysis/run_fmriprep.py'])
+if clean_level == 'strict_gs_cardiac':
+    subprocess.call(['python', 'ppu_analysis/add_cardiac_confound.py'])
 subprocess.call(['python', 'brain_analysis/fmri_cleaning.py'])
 subprocess.call(['python', 'synchrony_analysis/check_files.py'])
 

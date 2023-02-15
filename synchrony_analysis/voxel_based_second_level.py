@@ -10,14 +10,14 @@ import sys
 import pathlib
 sys.path.insert(0, os.path.dirname(pathlib.Path(__file__).parent.resolve()))
 os.chdir(os.path.dirname(pathlib.Path(__file__).parent.resolve()))
-from config import preproc_v
+from config import clean_level
 
 MNI_tamplate_path = os.environ['FSL_DIR'] + '/data/standard'
 MNI_2mm_mask = nib.load(MNI_tamplate_path + '/MNI152_T1_2mm_brain_mask.nii.gz')
 
 # load and filter the subjects list
 record_meta_pd = pd.read_csv('dataframes/egg_brain_meta_data.csv')
-if preproc_v == 'strict_gs_cardiac':
+if clean_level == 'strict_gs_cardiac':
     record_meta_pd = record_meta_pd.loc[record_meta_pd['ppu_exclude'] == False, :]
     record_meta_pd = record_meta_pd.loc[record_meta_pd['ppu_found'] == True, :]
 subjects_dict = {}
@@ -31,7 +31,7 @@ for measure_name in ['plv_delta', 'plv_permut_median', 'plvs_empirical']:
         for run_index, run in enumerate(subjects_dict[subject_name]):
             data_path = '../../derivatives/brain_gast/' + subject_name + '/' + subject_name+run
             img_plv = nib.load('../../derivatives/brain_gast/' + subject_name + '/' + subject_name + run +
-                               '/' + measure_name + '_' + subject_name + '_run' + run + preproc_v + '.nii.gz')
+                               '/' + measure_name + '_' + subject_name + '_run' + run + clean_level + '.nii.gz')
             if run_index == 0:
                 imgs_plv_runs = np.zeros(np.concatenate([[len(subjects_dict[subject_name])], img_plv.shape]))
                 if subject_index == 0:
@@ -42,18 +42,18 @@ for measure_name in ['plv_delta', 'plv_permut_median', 'plvs_empirical']:
         imgs_plv_runs[MNI_mask_aligned.get_fdata() == 0] = 0
         img_plv_avg = nib.Nifti1Image(imgs_plv_runs, affine=img_plv.affine, header=img_plv.header)
         nib.save(img_plv_avg, '../../derivatives/brain_gast/' + subject_name + '/' +
-                 measure_name + '_' + subject_name + '_mean_runs' + preproc_v + '.nii.gz')
+                 measure_name + '_' + subject_name + '_mean_runs' + clean_level + '.nii.gz')
         imgs_plv_subjects[subject_index,...] = imgs_plv_runs
     imgs_plv_subjects = imgs_plv_subjects.mean(axis=0)
     img_plv_avg = nib.Nifti1Image(imgs_plv_subjects, affine=img_plv.affine, header=img_plv.header)
-    nib.save(img_plv_avg, '../../derivatives/brain_gast/' + measure_name + '_mean_subjects' + preproc_v + '.nii.gz')
+    nib.save(img_plv_avg, '../../derivatives/brain_gast/' + measure_name + '_mean_subjects' + clean_level + '.nii.gz')
 
 ## perform Two-Sample Paired T-test - https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Randomise/UserGuide
 image_list = []
 for measure_name in ['plvs_empirical', 'plv_permut_median']: #'plv_p_vals',
     for subject_index, subject_name in enumerate(subjects_dict.keys()):
         image_list.append(nib.load('../../derivatives/brain_gast/' + subject_name + '/' +
-                                   measure_name + '_' + subject_name + '_mean_runs' + preproc_v + '.nii.gz'))
+                                   measure_name + '_' + subject_name + '_mean_runs' + clean_level + '.nii.gz'))
 
 image_4d = concat_imgs(image_list)
 nib.save(image_4d, '../../derivatives/brain_gast/fsl_randomize/4d.nii.gz')
@@ -80,7 +80,7 @@ rand = fsl.Randomise(in_file=os.path.abspath('../../derivatives/brain_gast/fsl_r
                      tcon=os.path.abspath('../../derivatives/brain_gast/fsl_randomize/design.con'),
                      design_mat=os.path.abspath('../../derivatives/brain_gast/fsl_randomize/design.mat'),
                      x_block_labels = os.path.abspath('../../derivatives/brain_gast/fsl_randomize/design.grp'),
-                     base_name = os.path.abspath('../../derivatives/brain_gast/fsl_randomize/result' + preproc_v + '_'),
+                     base_name = os.path.abspath('../../derivatives/brain_gast/fsl_randomize/result' + clean_level + '_'),
                      vox_p_values = True, c_thresh = 2.3, cm_thresh = 2.3, tfce = True,
                      num_perm = 10000)
 print(rand.cmdline)

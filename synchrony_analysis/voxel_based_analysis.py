@@ -5,7 +5,7 @@ import sys
 import pathlib
 sys.path.insert(0, os.path.dirname(pathlib.Path(__file__).parent.resolve()))
 os.chdir(os.path.dirname(pathlib.Path(__file__).parent.resolve()))
-from config import (sample_rate_fmri, intermediate_sample_rate, preproc_v, main_project_path)
+from config import (sample_rate_fmri, intermediate_sample_rate, clean_level, main_project_path)
 import nibabel as nib
 from scipy import signal
 from matplotlib import pyplot as plt
@@ -28,18 +28,18 @@ print('Processing subject:', subject_name, 'run:', run)
 #load data
 data_path = '../../derivatives/brain_gast/' + subject_name + '/' + subject_name+run
 MNI_tamplate_path = os.environ['FSL_DIR'] + '/data/standard/MNI152_T1_2mm.nii.gz'
-gastric_signal = np.load(data_path + '/gast_data_' + subject_name + '_run' + run + preproc_v +
+gastric_signal = np.load(data_path + '/gast_data_' + subject_name + '_run' + run + clean_level +
                          '_sliced.npy')
-brain_signal = np.load(data_path + '/func_filtered_' + subject_name + '_run' + run + preproc_v +
+brain_signal = np.load(data_path + '/func_filtered_' + subject_name + '_run' + run + clean_level +
                        '_sliced.npz')['brain_signal']
 original_fmri = nib.load(f'{main_project_path}/fmriprep/out/{subject_name}/fmriprep/{subject_name}_task-rest_run-0{run}'
-               f'_space-MNI152NLin6Asym_desc-preproc_bold_{preproc_v}.nii.gz')
+               f'_space-MNI152NLin6Asym_desc-preproc_bold_{clean_level}.nii.gz')
 record_meta_pd = pd.read_csv('dataframes/egg_brain_meta_data.csv')
 record_meta = record_meta_pd.loc[(record_meta_pd['subject'] == subject_name) &
                                     (record_meta_pd['run'] == int(run)),:].to_dict('records')[0]
 
 MNI_tamplate_3mm = resample_to_img(nib.load(MNI_tamplate_path), original_fmri)
-mask = np.load('../../derivatives/brain_gast/mask_' + subject_name + '_run' + run + preproc_v +  '.npz')['mask']
+mask = np.load('../../derivatives/brain_gast/mask_' + subject_name + '_run' + run + clean_level + '.npz')['mask']
 plot_path =  '../../plots/brain_gast/' + subject_name + '/' + subject_name+run
 
 # calculate the PLV
@@ -90,7 +90,7 @@ for measure_name, measure in zip(['plv_p_vals', 'plv_delta', 'plv_permut_median'
     vol_new = np.zeros((original_fmri.shape))
     vol_new[mask] = measure
     img_plv = nib.Nifti1Image(vol_new, affine = original_fmri.affine, header=original_fmri.header)
-    nib.save(img_plv, data_path + '/' + measure_name + '_' + subject_name + '_run' + run + preproc_v + '.nii.gz')
+    nib.save(img_plv, data_path + '/' + measure_name + '_' + subject_name + '_run' + run + clean_level + '.nii.gz')
 
     plotting.plot_stat_map(img_plv, bg_img = MNI_tamplate_3mm, title=measure_name,colorbar = True,
                            threshold=np.percentile(plvs_empirical,95))

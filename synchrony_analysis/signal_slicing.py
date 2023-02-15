@@ -4,7 +4,7 @@ import sys
 import pathlib
 sys.path.insert(0, os.path.dirname(pathlib.Path(__file__).parent.resolve()))
 os.chdir(os.path.dirname(pathlib.Path(__file__).parent.resolve()))
-from config import sample_rate_fmri, extra_cut, intermediate_sample_rate, preproc_v
+from config import sample_rate_fmri, extra_cut, intermediate_sample_rate, clean_level
 import pandas as pd
 import argparse
 
@@ -21,8 +21,8 @@ record_meta = record_meta_pd.loc[(record_meta_pd['subject'] == subject_name) &
                                     (record_meta_pd['run'] == int(run)),:].to_dict('records')[0]
 data_path = '../../derivatives/brain_gast/' + subject_name + '/' + subject_name+run
 
-gastric_signal = np.load(data_path + '/gast_data_' + subject_name + '_run' + run + preproc_v + '.npy')
-brain_signal = np.load(data_path + '/func_filtered_' + subject_name + '_run' + run + preproc_v + '.npz')['brain_signal']
+gastric_signal = np.load(data_path + '/gast_data_' + subject_name + '_run' + run + clean_level + '.npy')
+brain_signal = np.load(data_path + '/func_filtered_' + subject_name + '_run' + run + clean_level + '.npz')['brain_signal']
 gastric_sr_ratio = sample_rate_fmri / intermediate_sample_rate
 
 # cut the signals 1. to match each other 2. to remove edge effect
@@ -40,6 +40,6 @@ else:
     gastric_signal = gastric_signal[int(intermediate_sample_rate*extra_cut):-1*int(intermediate_sample_rate*extra_cut)]
     brain_signal = brain_signal[:,int(sample_rate_fmri*extra_cut):-1*int(sample_rate_fmri*extra_cut)]
 print('signal length: ' + str(brain_signal.shape[1]/sample_rate_fmri) + ' sec')
-np.save(data_path + '/gast_data_' + subject_name + '_run' + run + preproc_v +'_sliced.npy', gastric_signal)
-np.savez_compressed(data_path + '/func_filtered_' + subject_name + '_run' + run + preproc_v +'_sliced.npz',
+np.save(data_path + '/gast_data_' + subject_name + '_run' + run + clean_level + '_sliced.npy', gastric_signal)
+np.savez_compressed(data_path + '/func_filtered_' + subject_name + '_run' + run + clean_level + '_sliced.npz',
                     brain_signal=brain_signal)

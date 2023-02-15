@@ -12,20 +12,12 @@ def clean_func(inputs, confounds):
     """Clean the functional data by regressing out the nuisance regressors specified in [confounds]."""
     # read the subject's functional data
     try:
-        if single_subject:
-            subject, ses, run = inputs
-            confounds_df = pd.read_csv(confounds_template.
-                                       format(subject=subject, ses=ses, run=run), sep='\t')
-            rest_file = rest_file_template.format(subject=subject, ses=ses, run=run)
-            mask_file = mask_template.format(subject=subject, ses=ses, run=run)
-            output_path = output_file_template.format(subject=subject, ses=ses, run=run)
-        else:
-            subject, run = inputs
-            confounds_df = pd.read_csv(confounds_template.
-                                       format(subject=subject, run=run), sep='\t')
-            rest_file = rest_file_template.format(subject=subject, run=run)
-            mask_file = mask_template.format(subject=subject, run=run)
-            output_path = output_file_template.format(subject=subject[4:], run=run)
+        subject, run = inputs
+        confounds_df = pd.read_csv(confounds_template.
+                                   format(subject=subject, run=run), sep='\t')
+        rest_file = rest_file_template.format(subject=subject, run=run)
+        mask_file = mask_template.format(subject=subject, run=run)
+        output_path = output_file_template.format(subject=subject[4:], run=run)
 
         # clean confounds - see https://github.com/simexp/load_confounds
         confounds_df = dropna_confounds(confounds_df.loc[:,confounds])
@@ -71,7 +63,6 @@ multithreading = True
 clean_level = 'strict' # 'strict' #'strict_gs' # 'strict_gs_cardiac' # 'minimal'
 n_processes = 6
 overwrite = True
-single_subject = True
 fmriprep_dir = main_project_path + '/fmriprep/out/out/fmriprep'
 rest_file_template = fmriprep_dir + '/{subject}/func/{subject}_task-rest_run-' \
                                      '0{run}_space-MNI152NLin6Asym_desc-preproc_' \
@@ -143,12 +134,8 @@ if multithreading:
     pool = ThreadPool(n_processes)
     results = pool.map(clean_func, tasks_list)
 else:
-    if single_subject:
-        for subject, ses, run in tasks_list:
-            clean_func((subject, ses, run))
-    else:
-        for subject, run in tasks_list:
-            clean_func((subject, run))
+    for subject, run in tasks_list:
+        clean_func((subject, run))
 
 print('Done')
 
