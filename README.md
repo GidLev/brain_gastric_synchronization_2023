@@ -37,6 +37,7 @@ Finally, run the main script `main_voxel_based.py` from the project folder.
   * `dataframes/brain_meta_data.csv` - a table listing all runs with relevant meta-data, quality control measures and manual configurations if exist (dominant channel, etc.).
   * `gastric_utils.py` - EGG processing related functions
   * `spect_utils.py` - spectrogram related analysis functions
+  * `egg_confounds_sync.py` - contains the core functions used to calculate the synchronization between EGG signals and fMRI confounds (particularly head motion parameters) as presented in Figure 2 and Supplementary Figures 6-10. The code includes functions for Phase Locking Value (PLV) calculation, bandpass filtering around the gastric frequency, and confound processing. **Important Note**: This code was reconstructed from multiple source files approximately 3 years after the original analysis. While efforts were made to ensure accuracy, there might be minor discrepancies from the exact implementation used in the paper. Users may need to adapt the code to their specific data structure and requirements.
 
 ## Expected folder structure:
 
